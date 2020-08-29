@@ -35,7 +35,7 @@ def getNowPlayingMovie_list():
         for tag_img_item in item.find_all('img'):
             nowplaying_dict['name'] = tag_img_item['alt']
         nowplaying_list.append(nowplaying_dict)
-    return nowplaying_list
+    return nowplaying_list  # 返回字典列表
 
 
 # 根据电影ID获得评论
@@ -61,7 +61,7 @@ def getCommentsById(movie_id, page_num):
     return each_comment_list
 
 
-def main():
+def one_movie():
     comment_list = []
     nowplaying_movie_list = getNowPlayingMovie_list()
     for i in range(10):  # 前10页
@@ -94,7 +94,7 @@ def main():
     print(stopwords)
     keywords = {x: keywords[x] for x in keywords if x not in stopwords}
     print('after delete stopword:', keywords)
-
+    # 制作词云图
     wordcloud = WordCloud(font_path='simhei.ttf', background_color='white', max_font_size=80, stopwords=stopwords)
     word_frequence = keywords
     myword = wordcloud.fit_words(word_frequence)
@@ -104,5 +104,63 @@ def main():
     plt.show()  # 先保存，show之后生成空对象
 
 
+def multi_movie():
+    comment_list = []
+    nowplaying_movie_list = getNowPlayingMovie_list()  # 中途继续
+    nowplaying_movie_list = nowplaying_movie_list[7:]
+    for movie in nowplaying_movie_list:
+        id = movie['id']
+        name = movie['name']
+        for i in range(10):  # 前10页
+            num = i + 1
+            comment_list_temp = getCommentsById(id, num)  # 索引0为当前上映的《八佰》
+            comment_list.append(comment_list_temp)
+        # print(comment_list)
+        # 将列表中转换为字符串
+        comments = ''
+        for j in range(len(comment_list)):
+            comments = comments + (str(comment_list[j])).strip()
+        # 使用正则表达式去掉标点符号
+        pattern = re.compile(r'[\u4e00-\u9fa5]+')
+        filter_data = re.findall(pattern, comments)
+        cleaned_comments = ''.join(filter_data)
+        # 使用jieba分词，并获得词频排列列表
+        result = jieba.analyse.textrank(cleaned_comments, topK=50, withWeight=True)
+        keywords = {}
+        for k in result:
+            keywords[k[0]] = k[1]  # 把列表里的二元组形成字典
+        stopwords = get_stopwords(r'./movie_stopwords.txt')
+        print('before delete stopword:', keywords)
+        keywords = {x: keywords[x] for x in keywords if x not in stopwords}
+        print('after delete stopword:', keywords)
+        make_wordcloud(id, name, keywords=keywords, stopwords=stopwords)
+
+
+# 读取为停用词集合`
+def get_stopwords(path):
+    stopwords = set()
+    f = open(path, encoding='utf-8')
+    while True:
+        word = f.readline()
+        if word == '':
+            break
+        stopwords.add(word[:-1])
+    print(stopwords)
+    return stopwords
+
+
+# 制作词云图
+def make_wordcloud(id, name, keywords, stopwords):
+    wordcloud = WordCloud(font_path='simhei.ttf', background_color='white', max_font_size=80, stopwords=stopwords)
+    word_frequence = keywords
+    myword = wordcloud.fit_words(word_frequence)
+    name = name.replace('/', '∶')  # windows系统无法用/命名
+    plt.axis('off')
+    plt.imshow(myword)
+    plt.savefig(f'《{name}》豆瓣电影评论词云{id}.png', dpi=300, bbox_inches='tight')
+    plt.show()  # 先保存，show之后生成空对象
+
+
 if __name__ == '__main__':
-    main()
+    # one_movie()
+    multi_movie()
