@@ -136,7 +136,7 @@ def multi_movie():
         make_wordcloud(id, name, keywords=keywords, stopwords=stopwords)
 
 
-# 读取为停用词集合`
+# 读取为停用词集合
 def get_stopwords(path):
     stopwords = set()
     f = open(path, encoding='utf-8')
@@ -157,7 +157,7 @@ def make_wordcloud(id, name, keywords, stopwords):
     name = name.replace('/', '∶')  # windows系统无法用/命名
     plt.axis('off')
     plt.imshow(myword)
-    plt.savefig(f'《{name}》豆瓣电影评论词云{id}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'wordcloud/《{name}》豆瓣电影评论词云{id}.png', dpi=300, bbox_inches='tight')
     plt.show()  # 先保存，show之后生成空对象
 
 
