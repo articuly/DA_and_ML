@@ -31,7 +31,7 @@ headers = {'Host': 'search.51job.com',
 start_url = 'https://search.51job.com/list/000000,000000,0000,00,9,99,python,2,1.html?lang=c&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&ord_field=0&dibiaoid=0&line=&welfare='
 # 全局变量
 keyword = 'python'
-pages = 100
+pages = 60
 # csv实例
 csv_writer = csv.writer(open(f'{keyword}_jobs_all.csv', 'a', encoding='utf-8'))
 # 将N页职位搜索页加入到列表中
@@ -43,7 +43,7 @@ for i in range(1, pages + 1):
 # 抓取列表提取链接，添加到队列，并过滤重复的链接
 def extract_list_links():
     global headers
-    for url in links_list[50:]:
+    for url in links_list:
         # 请求链接
         req = requests.get(url, timeout=5, headers=headers)
         # 获取内容，gbk解码
