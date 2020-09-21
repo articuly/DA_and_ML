@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 import requests
 from lxml import html
+from urllib import parse
 import csv
 from redis import StrictRedis
 import json
@@ -31,7 +32,8 @@ headers = {'Host': 'search.51job.com',
 start_url = 'https://search.51job.com/list/000000,000000,0000,00,9,99,python,2,1.html?lang=c&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&ord_field=0&dibiaoid=0&line=&welfare='
 # 全局变量
 keyword = 'python'
-pages = 60
+keyword = parse.quote(parse.quote(keyword))
+pages = 100
 # csv实例
 csv_writer = csv.writer(open(f'{keyword}_jobs_all.csv', 'a', encoding='utf-8'))
 # 将N页职位搜索页加入到列表中
