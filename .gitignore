@@ -140,5 +140,5 @@ dmypy.json
 cython_debug/
 
 /.idea/
-Python职位数据分析/python_jobs_all.csv
+python_jobs_analysis/python_jobs_all.csv
 config.json
