@@ -145,3 +145,4 @@ config.json
 /使用预训练模型/101_ObjectCategories/
 /CNN-交通标志识别/GTSRB/
 /flask_predict_demo/.idea/
+temp.py
