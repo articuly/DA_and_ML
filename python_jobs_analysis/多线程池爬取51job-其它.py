@@ -31,10 +31,10 @@ headers = {'Host': 'search.51job.com',
            'X-Requested-With': 'XMLHttpRequest'}
 start_url = 'https://search.51job.com/list/030200%252c180200,000000,0000,00,9,99,%25E4%25BC%259A%25E5%25B1%2595%25E7%25AD%2596%25E5%2588%2592,2,1.html?lang=c&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&ord_field=0&dibiaoid=0&line=&welfare='
 # 全局变量
-keyword = '会展策划'
+keyword = '数据分析'
 csv_writer = csv.writer(open(f'{keyword}_jobs.csv', 'a', encoding='utf-8'))
 keyword = parse.quote(parse.quote(keyword))
-pages = 5
+pages = 2
 
 # 将N页职位搜索页加入到列表中
 for i in range(1, pages + 1):
