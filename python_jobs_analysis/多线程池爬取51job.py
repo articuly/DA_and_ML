@@ -11,7 +11,7 @@ from redis import StrictRedis
 import json
 
 # 连接缓存数据库
-redis = StrictRedis(host='127.0.0.1', port=6379)
+redis = StrictRedis(host='192.168.0.164', port=6379, password='123654')
 # 1岗位搜索列表页面链接列表
 links_list = list()
 # 2岗位详情列表页面链接队列
@@ -22,20 +22,26 @@ job_info_queue = Queue()
 redis.delete('crawled_links')
 
 # 浏览器参数
-cookie = 'guid=a07ece7b2525a88b80265c4041ebc65c; nsearch=jobarea%3D%26%7C%26ord_field%3D%26%7C%26recentSearch0%3D%26%7C%26recentSearch1%3D%26%7C%26recentSearch2%3D%26%7C%26recentSearch3%3D%26%7C%26recentSearch4%3D%26%7C%26collapse_expansion%3D; search=jobarea%7E%60030200%7C%21ord_field%7E%600%7C%21'
-headers = {'Host': 'search.51job.com',
-           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36',
-           'Accept': 'application/json, text/javascript, */*; q=0.01',
-           'Referer': 'https://search.51job.com/list/030200,000000,0000,00,9,99,python,2,5.html?lang=c&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&ord_field=0&dibiaoid=0&line=&welfare=',
-           'Cookie': cookie,
-           'X-Requested-With': 'XMLHttpRequest'}
+cookie = 'guid=28b9e58ebbd495c8e0da80537a1e6f2e; _ujz=NTExNjM2Nzgw; slife=lowbrowser%3Dnot%26%7C%26lastlogindate%3D20210327%26%7C%26; ps=needv%3D0; 51job=cuid%3D51163678%26%7C%26cusername%3Darticuly%26%7C%26cpassword%3D%26%7C%26cname%3D%25C1%25D6%25C9%25DC%25C1%25FA%26%7C%26cemail%3Darticuly%2540gmail.com%26%7C%26cemailstatus%3D3%26%7C%26cnickname%3D%26%7C%26ccry%3D.0c%252Fb8wrnH6IQ%26%7C%26cconfirmkey%3Dar24K7dZ5tWGk%26%7C%26cautologin%3D1%26%7C%26cenglish%3D0%26%7C%26sex%3D0%26%7C%26cnamekey%3Darwsy3SkEHK%252Fg%26%7C%26to%3D6e1de4460d98a88c14d98e4be04ca772605e98d5%26%7C%26'
+host_search = 'search.51job.com'
+host_job = 'jobs.51job.com'
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36 Edg/89.0.774.57'
+accept = 'application/json, text/javascript, text/html, application/xhtml+xml, application/xml, */*; q=0.01'
+referer = 'https://search.51job.com/list/030200,000000,0000,00,9,99,%25E5%2593%2581%25E7%2589%258C%25E7%25AD%2596%25E5%2588%2592,2,1.html?lang=c&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&ord_field=0&dibiaoid=0&line=&welfare='
+x_requested = 'XMLHttpRequest'
+# 职位页面的参数
+headers = {'Host': host_search, 'User-Agent': user_agent, 'Accept': accept,
+           'Referer': referer, 'Cookie': cookie, 'X-Requested-With': x_requested}
+# 职位详情页面的参数，与前者不同
+headers2 = {'Host': host_job, 'User-Agent': user_agent, 'Accept': accept,
+            'Referer': referer, 'Cookie': cookie, 'X-Requested-With': x_requested}
 start_url = 'https://search.51job.com/list/030200,000000,0000,00,9,99,python,2,1.html?lang=c&stype=&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&providesalary=99&lonlat=0%2C0&radius=-1&ord_field=0&confirmdate=9&fromType=&dibiaoid=0&address=&line=&specialarea=00&from=&welfare='
 # 全局变量
-keyword = 'python'
-keyword = parse.quote(parse.quote(keyword))
-pages = 50
+keyword_org = '品牌策划'
+keyword = parse.quote(parse.quote(keyword_org))
+pages = 48
 # csv实例
-csv_writer = csv.writer(open(f'{keyword}_jobs.csv', 'a', encoding='utf-8'))
+csv_writer = csv.writer(open(f'{keyword_org}_jobs.csv', 'a', encoding='utf-8'))
 # 将N页职位搜索页加入到列表中
 for i in range(1, pages + 1):
     url = f'https://search.51job.com/list/030200,000000,0000,00,9,99,{keyword},2,{i}.html?lang=c&stype=&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&providesalary=99&lonlat=0%2C0&radius=-1&ord_field=0&confirmdate=9&fromType=&dibiaoid=0&address=&line=&specialarea=00&from=&welfare='
@@ -68,7 +74,7 @@ def extract_list_links():
 def get_page(url, headers):
     time.sleep(random.randint(1, 5))  # 防止过量访问
     try:
-        res = requests.get(url=url, headers=headers)
+        res = requests.get(url=url, headers=headers2)
         page = res.content.decode('gbk')
     except Exception as e:
         print(e)
