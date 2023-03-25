@@ -148,8 +148,5 @@ config.json
 temp.py
 Untitled.ipynb
 *.xlsx
-*.csv
-*.png
 *.pptx
-*.txt
 *.pdf
