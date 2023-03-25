@@ -147,3 +147,9 @@ config.json
 /flask_predict_demo/.idea/
 temp.py
 Untitled.ipynb
+*.xlsx
+*.csv
+*.png
+*.pptx
+*.txt
+*.pdf
