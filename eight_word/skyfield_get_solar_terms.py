@@ -23,7 +23,7 @@ def solar_terms_list(year: int, ts):
     return list(zip(enum, time))
 
 
-def get_solar_terms(datetime_str: str):
+def compare_solar_terms(datetime_str: str):
     utc_time = convert_to_datetime(datetime_str)
     ts = api.load.timescale()
     sky_utc_time = ts.utc(utc_time)
@@ -33,14 +33,36 @@ def get_solar_terms(datetime_str: str):
     for i in range(0, list_len - 1):
         if sky_utc_time - terms_list[0][1] < 0:
             num = terms_list[0][0] - 1
-        elif sky_utc_time - terms_list[list_len-1][1] >= 0:
-            num = terms_list[list_len-1][0]
+        elif sky_utc_time - terms_list[list_len - 1][1] >= 0:
+            num = terms_list[list_len - 1][0]
         elif sky_utc_time - terms_list[i][1] >= 0 and sky_utc_time - terms_list[i + 1][1] < 0:
             num = terms_list[i][0]
     return num
 
 
-if __name__ == '__main__':
-    c = get_solar_terms('20221208 120000')
-    print(c)
+def compare_spring_begin(datetime_str: str):
+    utc_time = convert_to_datetime(datetime_str)
+    ts = api.load.timescale()
+    sky_utc_time = ts.utc(utc_time)
+    terms_list = solar_terms_list(utc_time.year, ts)
+    if sky_utc_time - terms_list[2][1] >= 0:
+        is_after_spring_begin = True
+    else:
+        is_after_spring_begin = False
+    return is_after_spring_begin
 
+
+def list_solar_terms(year: int):
+    ts = api.load.timescale()
+    eph = api.load('de421.bsp')
+    t0 = ts.utc(year, 1, 1)
+    t1 = ts.utc(year, 12, 31)
+    t, tm = almanac.find_discrete(t0, t1, almanac_east_asia.solar_terms(eph))
+    for tmi, ti in zip(tm, t):
+        print(tmi, almanac_east_asia.SOLAR_TERMS_ZHS[tmi], ti.utc_iso(' '))
+
+
+if __name__ == '__main__':
+    c = compare_solar_terms('20231208 120000')
+    print(c)
+    list_solar_terms(2023)
