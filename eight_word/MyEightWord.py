@@ -1,6 +1,7 @@
 # coding: utf-8
 from datetime import datetime, timedelta, date
-from skyfield_get_solar_terms import compare_solar_terms, compare_spring_begin
+import csv
+from skyfield_solar_terms import compare_solar_terms, compare_spring_begin, convert_to_datetime
 
 
 class EightWord:
@@ -46,11 +47,9 @@ class EightWord:
         if self.year < 2000:
             print('年份错误，请输入2000年后的八字')
         else:
-            self.yh = (self.year - 3) % 10
-            if self.yh == 0:
-                self.yh = 10
+            self.yh = (self.year - 3) % 10 or 10
             self.ye = (self.year - 3) % 12
-            if not self.test_spring_begin():
+            if (not self.test_spring_begin()) or (self.month == 1 and self.day == 1):
                 self.yh = self.yh - 1
                 if self.yh < 1:
                     self.yh = 10
@@ -71,27 +70,19 @@ class EightWord:
             local_year = self.year - 1
         else:
             local_year = self.year
-        local_yh = (local_year - 3) % 10
-        if local_yh == 0:
-            local_yh = 10
+        local_yh = (local_year - 3) % 10 or 10
         local_me = self.me
         if self.me == 1:
             local_me = 13
-        self.mh = (local_yh * 2 + local_me - 2) % 10
-        if self.mh == 0:
-            self.mh = 10
+        self.mh = (local_yh * 2 + local_me - 2) % 10 or 10
         # print(self.mh, self.me, end=' ')
         self.month_word = EightWord.heaven[self.mh] + EightWord.earth[self.me]
         return self.month_word
 
     def get_day_word(self):
         day_of_year = self.get_day_of_year(self.year, self.month, self.day)
-        self.dh = (day_of_year - 5) % 10
-        if self.dh == 0:
-            self.dh = 10
-        self.de = (day_of_year - 5) % 12
-        if self.de == 0:
-            self.de = 12
+        self.dh = (day_of_year - 5) % 10 or 10
+        self.de = (day_of_year - 5) % 12 or 12
         # print(self.dh, self.de, end=' ')
         self.day_word = EightWord.heaven[self.dh] + EightWord.earth[self.de]
         return self.day_word
@@ -99,12 +90,11 @@ class EightWord:
     def get_hour_word(self):
         if self.hour >= 23:
             new_date = date(self.year, self.month, self.day) + timedelta(days=1)
-            new_day_of_year = self.get_day_of_year(new_date.year, new_date.month, new_date.day)
-            local_dh = (new_day_of_year - 5) % 10
+            day_of_year = self.get_day_of_year(new_date.year, new_date.month, new_date.day)
         else:
             day_of_year = self.get_day_of_year(self.year, self.month, self.day)
-            local_dh = (day_of_year - 5) % 10
 
+        local_dh = (day_of_year - 5) % 10
         self.he = round((self.hour * 60 + self.minute) / 120) + 1
         if self.he > 12:
             self.he = self.he % 12
@@ -114,6 +104,9 @@ class EightWord:
         # print(self.hh, self.he, end=' ')
         self.hour_word = EightWord.heaven[self.hh] + EightWord.earth[self.he]
         return self.hour_word
+
+    def get_datetime_str(self):
+        return f'{self.year}-{self.month:0>2d}-{self.day:0>2d} {self.hour:0>2d}:{self.minute:0>2d}:{self.second:0>2d}'
 
 
 if __name__ == '__main__':
@@ -172,3 +165,26 @@ if __name__ == '__main__':
                     print(e.get_month_word(), end=' ')
                     print(e.get_day_word(), end=' ')
                     print(e.get_hour_word())
+
+    # start_time = datetime(2023, 1, 1, 0, 30)
+    # end_time = datetime(2025, 12, 31, 23, 59)
+    # delta = timedelta(hours=1)
+    # header = ['datetime', 'year', 'month', 'day', 'hour', 'minute',
+    #           'year_word', 'month_word', 'day_word', 'hour_word', 'eight_word']
+    #
+    # time_list = []
+    # while start_time <= end_time:
+    #     time_list.append(start_time)
+    #     start_time += delta
+    #
+    # with open('eight_word.csv', mode='w', newline='', encoding='utf-8') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(header)
+    #     for t in time_list:
+    #         y, m, d, h, mi = t.year, t.month, t.day, t.hour, t.minute
+    #         print(f'{y}-{m}-{d} {h}:{mi}:00')
+    #         e = EightWord(y, m, d, h, mi)
+    #         ew = e.get_year_word() + e.get_month_word() + e.get_day_word() + e.get_hour_word()
+    #         row = [e.get_datetime_str(), y, m, d, h, mi, e.get_year_word(), e.get_month_word(), e.get_day_word(),
+    #                e.get_hour_word(), ew]
+    #         writer.writerow(row)
