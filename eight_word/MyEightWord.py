@@ -1,7 +1,7 @@
 # coding: utf-8
 from datetime import datetime, timedelta, date
 import csv
-from skyfield_solar_terms import compare_solar_terms, compare_spring_begin, convert_to_datetime
+from skyfield_datetime_util import compare_solar_terms, compare_spring_begin, convert_to_datetime
 
 
 class EightWord:

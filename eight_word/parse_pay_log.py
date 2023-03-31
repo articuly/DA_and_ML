@@ -3,7 +3,7 @@ import csv
 import re
 
 from MyEightWord import EightWord
-from skyfield_solar_terms import datetime_returns
+from skyfield_datetime_util import datetime_returns
 
 # 打开文件，写入表头
 f = open('pay_log.txt', 'r', encoding='utf-8')

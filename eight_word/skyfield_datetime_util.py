@@ -6,9 +6,9 @@ from skyfield import almanac_east_asia
 from skyfield import api
 
 
-def convert_to_datetime(datetime_str: str, to_utc=False):
+def convert_to_datetime(datetime_str: str, to_utc=False, date_format='%Y%m%d %H%M%S'):
     # 将时间字符串转换为Python的datetime类型
-    dt = datetime.strptime(datetime_str, '%Y%m%d %H%M%S')
+    dt = datetime.strptime(datetime_str, date_format)
     if to_utc:
         return dt.astimezone(timezone.utc)
     else:
