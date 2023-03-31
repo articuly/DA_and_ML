@@ -1,15 +1,23 @@
-from skyfield import api
-from skyfield import almanac
-from skyfield import almanac_east_asia
 from datetime import datetime, timezone
 
+from pytz import timezone
+from skyfield import almanac
+from skyfield import almanac_east_asia
+from skyfield import api
 
-def convert_to_datetime(datetime_str: str):
+
+def convert_to_datetime(datetime_str: str, to_utc=False):
     # 将时间字符串转换为Python的datetime类型
     dt = datetime.strptime(datetime_str, '%Y%m%d %H%M%S')
-    # 将datetime类型转换为UTC时区
-    utc_dt = dt.astimezone(timezone.utc)
-    return utc_dt
+    if to_utc:
+        return dt.astimezone(timezone.utc)
+    else:
+        return dt.astimezone(timezone('Asia/Shanghai'))
+
+
+def datetime_returns(year_to_day: str, hour_to_second: str):
+    dt = convert_to_datetime(year_to_day + ' ' + hour_to_second, to_utc=False)
+    return dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second
 
 
 def solar_terms_list(year: int, ts):
@@ -41,7 +49,7 @@ def compare_solar_terms(datetime_str: str):
 
 
 def compare_spring_begin(datetime_str: str):
-    utc_time = convert_to_datetime(datetime_str)
+    utc_time = convert_to_datetime(datetime_str, to_utc=False)
     ts = api.load.timescale()
     sky_utc_time = ts.utc(utc_time)
     terms_list = solar_terms_list(utc_time.year, ts)
@@ -63,6 +71,8 @@ def list_solar_terms(year: int):
 
 
 if __name__ == '__main__':
-    c = compare_solar_terms('20231208 120000')
-    print(c)
-    list_solar_terms(2023)
+    # c = compare_spring_begin('20230101 033000')
+    # print(c)
+    # list_solar_terms(2023)
+    d = convert_to_datetime('20230101 033000', to_utc=True)
+    print(d)
