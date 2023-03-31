@@ -150,3 +150,6 @@ Untitled.ipynb
 *.xlsx
 *.pptx
 *.pdf
+
+/eight_word/*.csv
+/eight_word/*.txt
