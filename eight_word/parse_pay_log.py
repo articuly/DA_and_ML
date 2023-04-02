@@ -5,11 +5,12 @@ import re
 from MyEightWord import EightWord
 from skyfield_datetime_util import datetime_returns
 
-# 打开文件，写入表头
+# 读取祈愿记录文件
 f = open('pay_log.txt', 'r', encoding='utf-8')
 pay_log = f.readlines()
 f.close()
 
+# 打开CSV文件，写入表头
 t = open('pay_log.csv', 'w', newline='', encoding='utf-8')
 csv_writer = csv.writer(t)
 csv_writer.writerow(['name', 'times', 'year_to_day', 'hour_to_second', 'is_guarantee', 'eight_word'])

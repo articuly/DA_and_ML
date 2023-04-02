@@ -6,7 +6,7 @@ with open('eight_word.csv', 'r', encoding='utf-8') as file1:
     data1 = list(csv_reader1)
 
 # 打开原始CSV文件2
-with open('eight_word_2325.csv', 'r', encoding='utf-8') as file2:
+with open('eight_word_new.csv', 'r', encoding='utf-8') as file2:
     csv_reader2 = csv.reader(file2)
     data2 = list(csv_reader2)
 
@@ -22,4 +22,4 @@ with open('diff.csv', 'w', newline='', encoding='utf-8') as file_diff:
     for i in range(len(data1)):
         if data1[i] != data2[i]:
             # 如果数据不一致，则将差异写入新的CSV文件中
-            csv_writer_diff.writerow(["第{}行".format(i+1), data1[i], data2[i]])
+            csv_writer_diff.writerow(["第{}行".format(i + 1), data1[i], data2[i]])

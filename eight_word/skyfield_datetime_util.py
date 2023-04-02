@@ -1,6 +1,5 @@
-from datetime import datetime, timezone
-
-from pytz import timezone
+from datetime import datetime, timezone, date
+from pytz import timezone as tz
 from skyfield import almanac
 from skyfield import almanac_east_asia
 from skyfield import api
@@ -12,12 +11,20 @@ def convert_to_datetime(datetime_str: str, to_utc=False, date_format='%Y%m%d %H%
     if to_utc:
         return dt.astimezone(timezone.utc)
     else:
-        return dt.astimezone(timezone('Asia/Shanghai'))
+        return dt.astimezone(tz('Asia/Shanghai'))
 
 
 def datetime_returns(year_to_day: str, hour_to_second: str):
+    # 将字符串返回成多个时间变量
     dt = convert_to_datetime(year_to_day + ' ' + hour_to_second, to_utc=False)
     return dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second
+
+
+def get_day_of_year(year, month, day):
+    # 获取一年中的第几天
+    the_date = date(year, month, day)
+    day_of_year = int(the_date.strftime('%j'))
+    return day_of_year
 
 
 def solar_terms_list(year: int, ts):
@@ -32,6 +39,7 @@ def solar_terms_list(year: int, ts):
 
 
 def compare_solar_terms(datetime_str: str):
+    # 将时间字符串对比节气，返回时间的节气索引
     utc_time = convert_to_datetime(datetime_str)
     ts = api.load.timescale()
     sky_utc_time = ts.utc(utc_time)
@@ -49,6 +57,7 @@ def compare_solar_terms(datetime_str: str):
 
 
 def compare_spring_begin(datetime_str: str):
+    # 将时间字符串对比今年的立春节气
     utc_time = convert_to_datetime(datetime_str, to_utc=False)
     ts = api.load.timescale()
     sky_utc_time = ts.utc(utc_time)
@@ -61,6 +70,7 @@ def compare_spring_begin(datetime_str: str):
 
 
 def list_solar_terms(year: int):
+    # 显示某年的节气时间信息
     ts = api.load.timescale()
     eph = api.load('de421.bsp')
     t0 = ts.utc(year, 1, 1)
