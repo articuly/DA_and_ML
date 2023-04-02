@@ -1,7 +1,7 @@
 # coding: utf-8
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import csv
-from skyfield_datetime_util import compare_solar_terms, compare_spring_begin, convert_to_datetime
+from skyfield_datetime_util import compare_solar_terms, compare_spring_begin
 
 
 class EightWord:
@@ -15,6 +15,8 @@ class EightWord:
         self.hour = hour
         self.minute = minute
         self.second = second
+        self.dt = datetime(self.year, self.month, self.day, self.hour, self.minute, self.second)
+        self.hour_ts = int(self.dt.timestamp() / 60 / 60 + 8)
         self.datetime_str = f'{self.year}{self.month:0>2d}{self.day:0>2d} {self.hour:0>2d}{self.minute:0>2d}{self.second:0>2d}'
         self.yh = -1
         self.ye = -1
@@ -28,12 +30,6 @@ class EightWord:
         self.month_word = ''
         self.day_word = ''
         self.hour_word = ''
-
-    @staticmethod
-    def get_day_of_year(year, month, day):
-        the_date = date(year, month, day)
-        day_of_year = int(the_date.strftime('%j'))
-        return day_of_year
 
     def get_solar_terms_index(self):
         solar_term_index = compare_solar_terms(self.datetime_str)
@@ -80,27 +76,17 @@ class EightWord:
         return self.month_word
 
     def get_day_word(self):
-        day_of_year = self.get_day_of_year(self.year, self.month, self.day)
-        self.dh = (day_of_year - 5) % 10 or 10
-        self.de = (day_of_year - 5) % 12 or 12
+        self.dh = (int(self.hour_ts / 24) - 2) % 10 or 10
+        self.de = (int(self.hour_ts / 24) + 6) % 12 or 12
         # print(self.dh, self.de, end=' ')
         self.day_word = EightWord.heaven[self.dh] + EightWord.earth[self.de]
         return self.day_word
 
     def get_hour_word(self):
-        if self.hour >= 23:
-            new_date = date(self.year, self.month, self.day) + timedelta(days=1)
-            day_of_year = self.get_day_of_year(new_date.year, new_date.month, new_date.day)
-        else:
-            day_of_year = self.get_day_of_year(self.year, self.month, self.day)
-
-        local_dh = (day_of_year - 5) % 10
+        self.hh = int((self.hour_ts + 11) / 2) % 10 or 10
         self.he = round((self.hour * 60 + self.minute) / 120) + 1
         if self.he > 12:
             self.he = self.he % 12
-        self.hh = (local_dh * 2 + self.he - 2) % 10
-        if self.hh == 0:
-            self.hh = 10
         # print(self.hh, self.he, end=' ')
         self.hour_word = EightWord.heaven[self.hh] + EightWord.earth[self.he]
         return self.hour_word
@@ -108,13 +94,16 @@ class EightWord:
     def get_datetime_str(self):
         return f'{self.year}-{self.month:0>2d}-{self.day:0>2d} {self.hour:0>2d}:{self.minute:0>2d}:{self.second:0>2d}'
 
+    def get_timestamp(self):
+        return self.dt
+
 
 if __name__ == '__main__':
     # Test 1
-    # y = 2023
-    # m = 3
+    # y = 2022
+    # m = 4
     # mi = 30
-    # for d in range(20, 29):
+    # for d in range(1, 29):
     #     for h in range(0, 24):
     #         e = EightWord(y, m, d, h, mi)
     #         print(f'{y}-{m}-{d} {h}:{mi} ->', end=' ', )
@@ -150,41 +139,41 @@ if __name__ == '__main__':
     #             print(e.get_hour_word())
 
     # test 4
-    mi = 30
-    for y, m in [(2022, 12), (2023, 1), (2023, 2)]:
-        for d in range(1, 32):
-            for h in [0, 12, 23]:
-                try:
-                    datetime(y, m, d, h, mi)
-                except Exception:
-                    continue
-                else:
-                    e = EightWord(y, m, d, h, mi)
-                    print(f'{y}-{m}-{d} {h}:{mi} ->', end=' ', )
-                    print(e.get_year_word(), end=' ')
-                    print(e.get_month_word(), end=' ')
-                    print(e.get_day_word(), end=' ')
-                    print(e.get_hour_word())
+    # mi = 30
+    # for y, m in [(2022, 12), (2023, 1), (2023, 2)]:
+    #     for d in range(1, 32):
+    #         for h in [0, 6, 12, 23]:
+    #             try:
+    #                 datetime(y, m, d, h, mi)
+    #             except Exception:
+    #                 continue
+    #             else:
+    #                 e = EightWord(y, m, d, h, mi)
+    #                 print(f'{y}-{m}-{d} {h}:{mi} ->', end=' ', )
+    #                 print(e.get_year_word(), end=' ')
+    #                 print(e.get_month_word(), end=' ')
+    #                 print(e.get_day_word(), end=' ')
+    #                 print(e.get_hour_word())
 
-    # start_time = datetime(2023, 1, 1, 0, 30)
-    # end_time = datetime(2025, 12, 31, 23, 59)
-    # delta = timedelta(hours=1)
-    # header = ['datetime', 'year', 'month', 'day', 'hour', 'minute',
-    #           'year_word', 'month_word', 'day_word', 'hour_word', 'eight_word']
-    #
-    # time_list = []
-    # while start_time <= end_time:
-    #     time_list.append(start_time)
-    #     start_time += delta
-    #
-    # with open('eight_word.csv', mode='w', newline='', encoding='utf-8') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerow(header)
-    #     for t in time_list:
-    #         y, m, d, h, mi = t.year, t.month, t.day, t.hour, t.minute
-    #         print(f'{y}-{m}-{d} {h}:{mi}:00')
-    #         e = EightWord(y, m, d, h, mi)
-    #         ew = e.get_year_word() + e.get_month_word() + e.get_day_word() + e.get_hour_word()
-    #         row = [e.get_datetime_str(), y, m, d, h, mi, e.get_year_word(), e.get_month_word(), e.get_day_word(),
-    #                e.get_hour_word(), ew]
-    #         writer.writerow(row)
+    start_time = datetime(2023, 1, 1, 0, 30)
+    end_time = datetime(2025, 12, 31, 23, 59)
+    delta = timedelta(hours=1)
+    header = ['datetime', 'year', 'month', 'day', 'hour', 'minute',
+              'year_word', 'month_word', 'day_word', 'hour_word', 'eight_word']
+
+    time_list = []
+    while start_time <= end_time:
+        time_list.append(start_time)
+        start_time += delta
+
+    with open('eight_word_new.csv', mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(header)
+        for t in time_list:
+            y, m, d, h, mi = t.year, t.month, t.day, t.hour, t.minute
+            print(f'{y}-{m}-{d} {h}:{mi}:00')
+            e = EightWord(y, m, d, h, mi)
+            ew = e.get_year_word() + e.get_month_word() + e.get_day_word() + e.get_hour_word()
+            row = [e.get_datetime_str(), y, m, d, h, mi, e.get_year_word(), e.get_month_word(), e.get_day_word(),
+                   e.get_hour_word(), ew]
+            writer.writerow(row)
