@@ -3,6 +3,7 @@ from pytz import timezone as tz
 from skyfield import almanac
 from skyfield import almanac_east_asia
 from skyfield import api
+import time
 
 
 def convert_to_datetime(datetime_str: str, to_utc=False, date_format='%Y%m%d %H%M%S'):
@@ -40,7 +41,7 @@ def solar_terms_list(year: int, ts):
 
 def compare_solar_terms(datetime_str: str):
     # 将时间字符串对比节气，返回时间的节气索引
-    utc_time = convert_to_datetime(datetime_str)
+    utc_time = convert_to_datetime(datetime_str, to_utc=False)
     ts = api.load.timescale()
     sky_utc_time = ts.utc(utc_time)
     terms_list = solar_terms_list(utc_time.year, ts)
@@ -81,8 +82,13 @@ def list_solar_terms(year: int):
 
 
 if __name__ == '__main__':
-    # c = compare_spring_begin('20230101 033000')
-    # print(c)
-    # list_solar_terms(2023)
-    d = convert_to_datetime('20230101 033000', to_utc=True)
+    start_time = datetime.now()
+    c = compare_spring_begin('20230101 033000')
+    print(c)
+    d = compare_solar_terms('20230701 123000')
     print(d)
+    end_time = datetime.now()
+    print(end_time-start_time)
+    # list_solar_terms(2023)
+    # d = convert_to_datetime('20230101 033000', to_utc=True)
+    # print(d)

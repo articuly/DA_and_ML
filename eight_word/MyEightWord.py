@@ -1,6 +1,8 @@
 # coding: utf-8
+import os
 from datetime import datetime, timedelta
-import csv
+from multiprocessing import Pool
+
 from skyfield_datetime_util import compare_solar_terms, compare_spring_begin
 
 
@@ -98,6 +100,22 @@ class EightWord:
         return self.dt
 
 
+def main(dt: datetime):
+    e = EightWord(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+    ew = e.get_year_word() + e.get_month_word() + e.get_day_word() + e.get_hour_word()
+    row = [e.get_datetime_str(), dt.year, dt.month, dt.day, dt.hour, dt.minute, e.get_year_word(), e.get_month_word(),
+           e.get_day_word(), e.get_hour_word(), ew]
+    print(e.get_datetime_str())
+    return e.get_datetime_str()+'.txt', ','.join(row) + '\n'
+
+
+def write_to_file(filename, line):
+    file = open(filename, 'w', encoding='utf-8')
+    file.write(line)
+    print(line)
+    file.close()
+
+
 if __name__ == '__main__':
     # Test 1
     # y = 2022
@@ -155,25 +173,56 @@ if __name__ == '__main__':
     #                 print(e.get_day_word(), end=' ')
     #                 print(e.get_hour_word())
 
-    start_time = datetime(2023, 1, 1, 0, 30)
-    end_time = datetime(2025, 12, 31, 23, 59)
-    delta = timedelta(hours=1)
-    header = ['datetime', 'year', 'month', 'day', 'hour', 'minute',
-              'year_word', 'month_word', 'day_word', 'hour_word', 'eight_word']
+    # test 5
+    # start_time = datetime(2023, 1, 1, 0, 30)
+    # end_time = datetime(2025, 12, 31, 23, 59)
+    # delta = timedelta(hours=1)
+    # header = ['datetime', 'year', 'month', 'day', 'hour', 'minute',
+    #           'year_word', 'month_word', 'day_word', 'hour_word', 'eight_word']
+    #
+    # time_list = []
+    # while start_time <= end_time:
+    #     time_list.append(start_time)
+    #     start_time += delta
+    #
+    # with open('eight_word_26.csv', mode='w', newline='', encoding='utf-8') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(header)
+    #     for t in time_list:
+    #         y, m, d, h, mi = t.year, t.month, t.day, t.hour, t.minute
+    #         print(f'{y}-{m}-{d} {h}:{mi}:00')
+    #         e = EightWord(y, m, d, h, mi)
+    #         ew = e.get_year_word() + e.get_month_word() + e.get_day_word() + e.get_hour_word()
+    #         row = [e.get_datetime_str(), y, m, d, h, mi, e.get_year_word(), e.get_month_word(), e.get_day_word(),
+    #                e.get_hour_word(), ew]
+    #         writer.writerow(row)
 
+    # test 5
+    start = datetime.now()
+    print(start)
+    start_time = datetime(2023, 1, 1, 0, 30)
+    end_time = datetime(2023, 1, 5, 23, 59)
+    delta = timedelta(hours=1)
     time_list = []
     while start_time <= end_time:
         time_list.append(start_time)
         start_time += delta
 
-    with open('eight_word_new.csv', mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(header)
-        for t in time_list:
-            y, m, d, h, mi = t.year, t.month, t.day, t.hour, t.minute
-            print(f'{y}-{m}-{d} {h}:{mi}:00')
-            e = EightWord(y, m, d, h, mi)
-            ew = e.get_year_word() + e.get_month_word() + e.get_day_word() + e.get_hour_word()
-            row = [e.get_datetime_str(), y, m, d, h, mi, e.get_year_word(), e.get_month_word(), e.get_day_word(),
-                   e.get_hour_word(), ew]
-            writer.writerow(row)
+    word_dir = os.fsencode('D:\\Projects\\python_projects\\DA_and_ML\\eight_word\\result')
+    os.chdir(word_dir)
+
+    # header = ['datetime', 'year', 'month', 'day', 'hour', 'minute',
+    #           'year_word', 'month_word', 'day_word', 'hour_word', 'eight_word']
+    # f = open(file_name, 'w', encoding='utf-8')
+    # f.write(','.join(header) + '\n')
+    # f.close()
+
+    pool = Pool(8)
+    for t in time_list:
+        pool.apply_async(main, args=(t,), callback=write_to_file)
+    pool.close()
+    pool.join()
+
+    end = datetime.now()
+    print(end)
+    print((end - start))

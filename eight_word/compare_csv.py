@@ -1,7 +1,7 @@
 import csv
 
 # 打开原始CSV文件1
-with open('eight_word.csv', 'r', encoding='utf-8') as file1:
+with open('eight_word_23.csv', 'r', encoding='utf-8') as file1:
     csv_reader1 = csv.reader(file1)
     data1 = list(csv_reader1)
 
